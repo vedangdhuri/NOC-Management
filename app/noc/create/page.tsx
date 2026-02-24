@@ -24,6 +24,15 @@ export default function CreateNOCPage() {
   const [classes, setClasses] = useState<ClassOption[]>([]);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [classInput, setClassInput] = useState("");
+  const [subjectInputs, setSubjectInputs] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
   const [formData, setFormData] = useState({
     type: "",
     subject: "",
@@ -60,7 +69,13 @@ export default function CreateNOCPage() {
     }
     setLoading(true);
     try {
-      const { data } = await api.post("/noc", formData);
+      const finalSubject = subjectInputs
+        .filter((s) => s.trim() !== "")
+        .join(", ");
+      const { data } = await api.post("/noc", {
+        ...formData,
+        subject: finalSubject,
+      });
       toast.success("NOC request submitted successfully!");
       router.push(`/noc/${data.data._id}`);
     } catch (err) {
@@ -107,31 +122,92 @@ export default function CreateNOCPage() {
 
               <div className="form-group">
                 <label className="form-label">Class</label>
-                <select
-                  name="classId"
-                  className="form-select"
-                  value={formData.classId}
-                  onChange={handleChange}
-                >
-                  <option value="">Select class...</option>
+                <input
+                  list="class-list"
+                  name="classInput"
+                  className="form-input"
+                  placeholder="Type to search class..."
+                  value={classInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setClassInput(val);
+                    const match = classes.find(
+                      (c) => `${c.name} — Sem ${c.semester}` === val,
+                    );
+                    setFormData({
+                      ...formData,
+                      classId: match ? match._id : "",
+                    });
+                  }}
+                />
+                <datalist id="class-list">
                   {classes.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name} — Sem {c.semester}
-                    </option>
+                    <option
+                      key={c._id}
+                      value={`${c.name} — Sem ${c.semester}`}
+                    />
                   ))}
-                </select>
+                </datalist>
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Subject (if applicable)</label>
-              <input
-                name="subject"
-                className="form-input"
-                placeholder="e.g. Operating Systems, DBMS..."
-                value={formData.subject}
-                onChange={handleChange}
-              />
+            <div
+              className="form-group"
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
+            >
+              <label className="form-label">
+                Subjects (if applicable) - Type or Select from list
+              </label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {subjectInputs.map((subj, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      list="subject-list"
+                      className="form-input"
+                      placeholder={`Subject ${idx + 1}...`}
+                      value={subj}
+                      onChange={(e) => {
+                        const newSubj = [...subjectInputs];
+                        newSubj[idx] = e.target.value;
+                        setSubjectInputs(newSubj);
+                      }}
+                    />
+                    {subjectInputs.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          const newSubj = subjectInputs.filter(
+                            (_, i) => i !== idx,
+                          );
+                          setSubjectInputs(newSubj);
+                        }}
+                        style={{
+                          padding: "0 14px",
+                          background: "#fee2e2",
+                          color: "#dc2626",
+                          borderColor: "#fca5a5",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <datalist id="subject-list">
+                {subjects.map((s) => (
+                  <option key={s._id} value={s.name} />
+                ))}
+              </datalist>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setSubjectInputs([...subjectInputs, ""])}
+                style={{ alignSelf: "flex-start", marginTop: "4px" }}
+              >
+                + Add Another Subject
+              </button>
             </div>
 
             <div className="form-grid">

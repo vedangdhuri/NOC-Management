@@ -19,7 +19,6 @@ export default function AdminSubjectsPage() {
     classId: "",
     facultyId: "",
     semester: "",
-    credits: "3",
   });
 
   const fetchAll = async () => {
@@ -51,7 +50,6 @@ export default function AdminSubjectsPage() {
       classId: "",
       facultyId: "",
       semester: "",
-      credits: "3",
     });
     setShowModal(true);
   };
@@ -63,7 +61,6 @@ export default function AdminSubjectsPage() {
       classId: s.classId?._id || "",
       facultyId: s.facultyId?._id || "",
       semester: s.semester || "",
-      credits: s.credits || "3",
     });
     setShowModal(true);
   };
@@ -74,7 +71,6 @@ export default function AdminSubjectsPage() {
       const payload = {
         ...form,
         semester: form.semester ? Number(form.semester) : undefined,
-        credits: Number(form.credits),
       };
       if (editItem) {
         await api.put(`/subjects/${editItem._id}`, payload);
@@ -140,7 +136,6 @@ export default function AdminSubjectsPage() {
                   <th>Faculty</th>
                   <th>Class</th>
                   <th>Sem</th>
-                  <th>Credits</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -163,7 +158,6 @@ export default function AdminSubjectsPage() {
                     <td style={{ fontSize: 13 }}>{s.facultyId?.name || "—"}</td>
                     <td style={{ fontSize: 13 }}>{s.classId?.name || "—"}</td>
                     <td>{s.semester ? `Sem ${s.semester}` : "—"}</td>
-                    <td>{s.credits}</td>
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
                         <button
@@ -274,7 +268,7 @@ export default function AdminSubjectsPage() {
                 </select>
               </div>
               <div className="form-grid">
-                <div className="form-group">
+                <div className="form-group" style={{ gridColumn: "1 / -1" }}>
                   <label className="form-label">Semester</label>
                   <select
                     className="form-select"
@@ -290,19 +284,6 @@ export default function AdminSubjectsPage() {
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Credits</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    min={1}
-                    max={6}
-                    value={form.credits}
-                    onChange={(e) =>
-                      setForm({ ...form, credits: e.target.value })
-                    }
-                  />
                 </div>
               </div>
               <div

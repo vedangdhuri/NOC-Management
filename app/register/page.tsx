@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import api from "@/lib/api";
-import { useRouter } from "next/navigation";
+
 import toast from "react-hot-toast";
 import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import { DEPARTMENTS } from "@/lib/utils";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -37,12 +36,12 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const { confirmPassword, ...rest } = formData;
-      await api.post("/auth/register", {
+      const { data } = await api.post("/auth/register", {
         ...rest,
         semester: rest.semester ? Number(rest.semester) : undefined,
       });
-      toast.success("Registration successful! Please log in.");
-      router.push("/login");
+      toast.success("Registration successful!");
+      window.location.href = `/dashboard/${data?.user?.role || rest.role || "student"}`;
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       toast.error(error?.response?.data?.message || "Registration failed");

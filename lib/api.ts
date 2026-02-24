@@ -6,13 +6,15 @@ const api = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-// Response interceptor for global error handling
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             if (typeof window !== "undefined") {
-                window.location.href = "/login";
+                const publicPaths = ["/", "/login", "/register"];
+                if (!publicPaths.includes(window.location.pathname)) {
+                    window.location.href = "/login";
+                }
             }
         }
         return Promise.reject(error);

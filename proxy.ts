@@ -3,22 +3,15 @@ import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/register", "/unauthorized"];
 
-const ROLE_DASHBOARDS: Record<string, string> = {
-    student: "/dashboard/student",
-    faculty: "/dashboard/faculty",
-    hod: "/dashboard/hod",
-    admin: "/dashboard/admin",
-};
-
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get("token")?.value;
 
     // Allow public paths without auth
-    if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+    if (PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/") {
         // Redirect authenticated users away from login
-        if (token && pathname === "/login") {
-            return NextResponse.redirect(new URL("/", request.url));
+        if (token && (pathname === "/login" || pathname === "/register")) {
+            return NextResponse.redirect(new URL("/dashboard/student", request.url));
         }
         return NextResponse.next();
     }
